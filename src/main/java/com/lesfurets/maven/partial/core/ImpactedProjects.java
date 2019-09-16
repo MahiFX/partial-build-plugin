@@ -3,17 +3,18 @@
  */
 package com.lesfurets.maven.partial.core;
 
-import static com.lesfurets.maven.partial.utils.DependencyUtils.collectDependenciesInSnapshot;
-import static com.lesfurets.maven.partial.utils.DependencyUtils.collectDependents;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.lesfurets.maven.partial.utils.DependencyUtils.collectDependenciesInSnapshot;
+import static com.lesfurets.maven.partial.utils.DependencyUtils.collectDependents;
 
 @Singleton
 public class ImpactedProjects {
@@ -27,15 +28,15 @@ public class ImpactedProjects {
         HashSet<MavenProject> changed = new HashSet<>(changedProjects);
         changed.removeAll(configuration.ignoredProjects);
         if (configuration.impacted) {
-            mavenSession.getProjects().stream()
-                            .filter(changed::contains)
-                            .forEach(p -> collectDependents(mavenSession.getProjects(), p, changed));
+            mavenSession.getAllProjects().stream()
+                    .filter(changed::contains)
+                    .forEach(p -> collectDependents(mavenSession.getAllProjects(), p, changed));
         }
         if (configuration.buildSnapshotDependencies) {
-            mavenSession.getProjects().stream()
-                            .filter(changed::contains)
-                            .forEach(p -> collectDependenciesInSnapshot(mavenSession.getProjects(), p, changed));
+            mavenSession.getAllProjects().stream()
+                    .filter(changed::contains)
+                    .forEach(p -> collectDependenciesInSnapshot(mavenSession.getAllProjects(), p, changed));
         }
-        return mavenSession.getProjects().stream().filter(changed::contains).collect(Collectors.toList());
+        return mavenSession.getAllProjects().stream().filter(changed::contains).collect(Collectors.toList());
     }
 }

@@ -43,6 +43,7 @@ public class MavenSessionMock {
         MavenExecutionRequest request = mock(MavenExecutionRequest.class);
         when(mavenSession.getRequest()).thenReturn(request);
         when(mavenSession.getUserProperties()).thenReturn(new Properties());
+        when(mavenSession.getAllProjects()).thenReturn(projects);
         when(mavenSession.getProjects()).thenReturn(projects);
         when(mavenSession.getTopLevelProject()).thenReturn(projects.get(0));
         when(mavenSession.getExecutionRootDirectory()).thenReturn(repoDir);

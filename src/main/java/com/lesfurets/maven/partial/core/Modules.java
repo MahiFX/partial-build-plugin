@@ -18,7 +18,7 @@ public class Modules {
     MavenSession session;
 
     public Map<Path, MavenProject> createPathMap() {
-        return session.getProjects().stream()
+        return session.getAllProjects().stream()
                         .collect(Collectors.toMap(Modules::getPath, project -> project));
     }
 

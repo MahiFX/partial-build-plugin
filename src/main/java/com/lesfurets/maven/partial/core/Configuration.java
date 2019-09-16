@@ -100,13 +100,13 @@ public class Configuration {
 
     private Set<MavenProject> getIgnoredProjects(MavenSession session, String ignoreChangedPattern) {
         if (Strings.isNullOrEmpty(ignoreChangedPattern)) {
-            return session.getProjects().stream()
+            return session.getAllProjects().stream()
                             .filter(this::isProjectIgnored)
                             .collect(Collectors.toSet());
         }
         List<String> patterns = separatePattern(ignoreChangedPattern);
         final PatternIncludesArtifactFilter filter = new PatternIncludesArtifactFilter(patterns);
-        return session.getProjects().stream()
+        return session.getAllProjects().stream()
                         .filter(p -> filter.include(p.getArtifact()) || isProjectIgnored(p))
                         .collect(Collectors.toSet());
     }
@@ -117,7 +117,7 @@ public class Configuration {
         }
         List<String> patterns = separatePattern(buildAnywaysPattern);
         PatternIncludesArtifactFilter filter = new PatternIncludesArtifactFilter(patterns);
-        return session.getProjects().stream()
+        return session.getAllProjects().stream()
                 .filter(p -> filter.include(p.getArtifact()))
                 .collect(Collectors.toSet());
     }

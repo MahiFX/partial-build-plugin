@@ -53,7 +53,7 @@ public class UnchangedProjectsRemover {
     }
 
     private void writeChangedProjects(Collection<MavenProject> sortedChanged) {
-        mavenSession.getProjects().forEach(m -> m.getProperties()
+        mavenSession.getAllProjects().forEach(m -> m.getProperties()
                         .setProperty(CHANGED_PROJECTS,
                                         joinProjectIds(sortedChanged, new StringJoiner(",")).toString()));
 

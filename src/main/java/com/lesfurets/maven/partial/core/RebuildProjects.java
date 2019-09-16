@@ -45,12 +45,12 @@ public class RebuildProjects {
                 mavenSession.getGoals().clear();
                 mavenSession.getGoals().add("validate");
             } else {
-                mavenSession.setProjects(mavenSession.getProjects().stream()
+                mavenSession.setProjects(mavenSession.getAllProjects().stream()
                                 .filter(rebuildProjects::contains)
                                 .collect(Collectors.toList()));
             }
         } else {
-            mavenSession.getProjects().stream()
+            mavenSession.getAllProjects().stream()
                             .filter(p -> !changed.contains(p))
                             .forEach(p -> {
                                 this.ifSkipDependenciesTest(p);
@@ -82,6 +82,6 @@ public class RebuildProjects {
     }
 
     private Stream<MavenProject> ifMakeUpstreamGetDependencies(MavenProject mavenProject) {
-        return getAllDependencies(mavenSession.getProjects(), mavenProject).stream();
+        return getAllDependencies(mavenSession.getAllProjects(), mavenProject).stream();
     }
 }
