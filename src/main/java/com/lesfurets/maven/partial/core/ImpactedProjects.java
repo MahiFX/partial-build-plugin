@@ -28,15 +28,15 @@ public class ImpactedProjects {
         HashSet<MavenProject> changed = new HashSet<>(changedProjects);
         changed.removeAll(configuration.ignoredProjects);
         if (configuration.impacted) {
-            mavenSession.getAllProjects().stream()
+            mavenSession.getProjects().stream()
                     .filter(changed::contains)
                     .forEach(p -> collectDependents(mavenSession.getAllProjects(), p, changed));
         }
         if (configuration.buildSnapshotDependencies) {
-            mavenSession.getAllProjects().stream()
+            mavenSession.getProjects().stream()
                     .filter(changed::contains)
                     .forEach(p -> collectDependenciesInSnapshot(mavenSession.getAllProjects(), p, changed));
         }
-        return mavenSession.getAllProjects().stream().filter(changed::contains).collect(Collectors.toList());
+        return mavenSession.getProjects().stream().filter(changed::contains).collect(Collectors.toList());
     }
 }

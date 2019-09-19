@@ -3,19 +3,18 @@
  */
 package com.lesfurets.maven.partial.core;
 
-import static com.lesfurets.maven.partial.utils.DependencyUtils.getAllDependencies;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.MavenProject;
+import org.codehaus.plexus.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.MavenProject;
-import org.codehaus.plexus.logging.Logger;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import static com.lesfurets.maven.partial.utils.DependencyUtils.getAllDependencies;
 
 @Singleton
 public class RebuildProjects {
@@ -38,33 +37,33 @@ public class RebuildProjects {
             Collection<MavenProject> rebuildProjects = changed;
             if (configuration.makeUpstream) {
                 rebuildProjects = Stream.concat(changed.stream(), collectDependencies(changed))
-                                .collect(Collectors.toSet());
+                        .collect(Collectors.toSet());
             }
             if (rebuildProjects.isEmpty()) {
                 logger.info("No changed artifacts to build. Executing validate goal only.");
                 mavenSession.getGoals().clear();
                 mavenSession.getGoals().add("validate");
             } else {
-                mavenSession.setProjects(mavenSession.getAllProjects().stream()
-                                .filter(rebuildProjects::contains)
-                                .collect(Collectors.toList()));
+                mavenSession.setProjects(mavenSession.getProjects().stream()
+                        .filter(rebuildProjects::contains)
+                        .collect(Collectors.toList()));
             }
         } else {
-            mavenSession.getAllProjects().stream()
-                            .filter(p -> !changed.contains(p))
-                            .forEach(p -> {
-                                this.ifSkipDependenciesTest(p);
-                                this.ifSkipDependenciesSonar(p);
-                            });
+            mavenSession.getProjects().stream()
+                    .filter(p -> !changed.contains(p))
+                    .forEach(p -> {
+                        this.ifSkipDependenciesTest(p);
+                        this.ifSkipDependenciesSonar(p);
+                    });
         }
     }
 
     private Stream<MavenProject> collectDependencies(Collection<MavenProject> changedProjects) {
         return changedProjects.stream()
-                        .flatMap(this::ifMakeUpstreamGetDependencies)
-                        .filter(p -> !changedProjects.contains(p))
-                        .map(this::ifSkipDependenciesTest)
-                        .map(this::ifSkipDependenciesSonar);
+                .flatMap(this::ifMakeUpstreamGetDependencies)
+                .filter(p -> !changedProjects.contains(p))
+                .map(this::ifSkipDependenciesTest)
+                .map(this::ifSkipDependenciesSonar);
     }
 
     private MavenProject ifSkipDependenciesTest(MavenProject mavenProject) {
@@ -82,6 +81,6 @@ public class RebuildProjects {
     }
 
     private Stream<MavenProject> ifMakeUpstreamGetDependencies(MavenProject mavenProject) {
-        return getAllDependencies(mavenSession.getAllProjects(), mavenProject).stream();
+        return getAllDependencies(mavenSession.getProjects(), mavenProject).stream();
     }
 }

@@ -1,19 +1,21 @@
 package com.lesfurets.maven.partial.core;
 
-import static com.lesfurets.maven.partial.utils.PluginUtils.joinProjectIds;
-import static com.lesfurets.maven.partial.utils.PluginUtils.writeChangedProjectsToFile;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.StringJoiner;
+
+import static com.lesfurets.maven.partial.utils.PluginUtils.joinProjectIds;
+import static com.lesfurets.maven.partial.utils.PluginUtils.writeChangedProjectsToFile;
 
 @Singleton
 public class UnchangedProjectsRemover {
@@ -53,9 +55,9 @@ public class UnchangedProjectsRemover {
     }
 
     private void writeChangedProjects(Collection<MavenProject> sortedChanged) {
-        mavenSession.getAllProjects().forEach(m -> m.getProperties()
-                        .setProperty(CHANGED_PROJECTS,
-                                        joinProjectIds(sortedChanged, new StringJoiner(",")).toString()));
+        mavenSession.getProjects().forEach(m -> m.getProperties()
+                .setProperty(CHANGED_PROJECTS,
+                        joinProjectIds(sortedChanged, new StringJoiner(",")).toString()));
 
         if (configuration.writeChanged) {
             Path defaultPath = Modules.getPath(mavenSession.getTopLevelProject()).resolve(CHANGED_PROJECTS);

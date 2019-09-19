@@ -117,7 +117,7 @@ public class Configuration {
         }
         List<String> patterns = separatePattern(buildAnywaysPattern);
         PatternIncludesArtifactFilter filter = new PatternIncludesArtifactFilter(patterns);
-        return session.getAllProjects().stream()
+        return session.getProjects().stream()
                 .filter(p -> filter.include(p.getArtifact()))
                 .collect(Collectors.toSet());
     }

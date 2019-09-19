@@ -1,17 +1,17 @@
 package com.lesfurets.maven.partial.core;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.logging.Logger;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class ChangedProjects {
@@ -27,9 +27,9 @@ public class ChangedProjects {
         Map<Path, MavenProject> pathMap = modules.createPathMap();
         // find changed projects
         return differentFiles.get().stream()
-                        .map(p -> findProject(p, pathMap))
-                        .filter(project -> project != null)
-                        .collect(Collectors.toSet());
+                .map(p -> findProject(p, pathMap))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     private MavenProject findProject(final Path diffPath, Map<Path, MavenProject> map) {
