@@ -1,8 +1,7 @@
 package com.lesfurets.maven.partial.core;
 
 import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,6 +88,18 @@ public abstract class DifferentFilesTest extends RepoTest {
         Property.baseBranch.setValue(REFS_HEADS_FEATURE_2);
         Property.compareToMergeBase.setValue("true");
         assertTrue(getInstance().get().stream().collect(toSet()).contains(LOCAL_DIR.resolve("feature2-only-file.txt")));
+        assertTrue(consoleOut.toString().contains("ee64b9b863d3d30b429459cb3ccfaeac67e4efa1"));
+    }
+
+    @Test
+    public void ignoredPattern() throws Exception {
+        Property.ignoredFiles.setValue(".*/feature2-only-file.*");
+        getLocalRepoMock().getGit().reset().setRef(REFS_HEADS_FEATURE_2).setMode(ResetCommand.ResetType.HARD).call();
+        getLocalRepoMock().getGit().checkout().setName(REFS_HEADS_FEATURE_2).call();
+        getLocalRepoMock().getGit().reset().setRef(HEAD).setMode(ResetCommand.ResetType.HARD).call();
+        Property.baseBranch.setValue(REFS_HEADS_FEATURE_2);
+        Property.compareToMergeBase.setValue("true");
+        assertFalse(getInstance().get().stream().collect(toSet()).contains(LOCAL_DIR.resolve("feature2-only-file.txt")));
         assertTrue(consoleOut.toString().contains("ee64b9b863d3d30b429459cb3ccfaeac67e4efa1"));
     }
 

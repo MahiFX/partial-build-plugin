@@ -1,12 +1,7 @@
 package com.lesfurets.maven.partial.core;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.codehaus.plexus.logging.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -18,8 +13,12 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class DifferentFilesJGit implements DifferentFiles {
@@ -56,7 +55,7 @@ public class DifferentFilesJGit implements DifferentFiles {
             }
             git.getRepository().close();
             git.close();
-            return paths;
+            return paths.stream().filter(path -> !configuration.ignoredChangedFile(path)).collect(Collectors.toSet());
         } catch (GitAPIException e) {
             throw new IOException(e);
         }
@@ -64,7 +63,7 @@ public class DifferentFilesJGit implements DifferentFiles {
 
     private void checkout() throws IOException, GitAPIException {
         if (!HEAD.equals(configuration.baseBranch)
-                        && !git.getRepository().getFullBranch().equals(configuration.baseBranch)) {
+                && !git.getRepository().getFullBranch().equals(configuration.baseBranch)) {
             logger.info("Checking out base branch " + configuration.baseBranch + "...");
             git.checkout().setName(configuration.baseBranch).call();
         }
@@ -83,7 +82,7 @@ public class DifferentFilesJGit implements DifferentFiles {
         logger.info("Fetching branch " + branchName);
         if (!branchName.startsWith(REFS_REMOTES)) {
             throw new IllegalArgumentException("Branch name '" + branchName + "' is not tracking branch name since it" +
-                            " does not start " + REFS_REMOTES);
+                    " does not start " + REFS_REMOTES);
         }
         String remoteName = extractRemoteName(branchName);
         String shortName = extractShortName(remoteName, branchName);
@@ -131,12 +130,12 @@ public class DifferentFilesJGit implements DifferentFiles {
 
     private Set<Path> getUncommitedChanges(Path gitDir) throws GitAPIException {
         return git.status().call().getUncommittedChanges().stream()
-                        .map(gitDir::resolve).map(Path::normalize).collect(Collectors.toSet());
+                .map(gitDir::resolve).map(Path::normalize).collect(Collectors.toSet());
     }
 
     private Set<Path> getUntrackedChanges(Path gitDir) throws GitAPIException {
         return git.status().call().getUntracked().stream()
-                        .map(gitDir::resolve).map(Path::normalize).collect(Collectors.toSet());
+                .map(gitDir::resolve).map(Path::normalize).collect(Collectors.toSet());
     }
 
     private RevCommit resolveReference(RevCommit base) throws IOException {

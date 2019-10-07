@@ -43,7 +43,7 @@ public class DifferentFilesNative implements DifferentFiles {
         if (configuration.untracked) {
             paths.addAll(getUntrackedChanges(gitDir));
         }
-        return paths;
+        return paths.stream().filter(path -> !configuration.ignoredChangedFile(path)).collect(Collectors.toSet());
     }
 
     private Path getParentPath() {
