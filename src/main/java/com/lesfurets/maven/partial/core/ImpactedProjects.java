@@ -11,6 +11,7 @@ import org.apache.maven.project.MavenProject;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.lesfurets.maven.partial.utils.DependencyUtils.collectDependenciesInSnapshot;
@@ -25,12 +26,12 @@ public class ImpactedProjects {
     private MavenSession mavenSession;
 
     public List<MavenProject> get(Collection<MavenProject> changedProjects) {
-        HashSet<MavenProject> changed = new HashSet<>(changedProjects);
+        Set<MavenProject> changed = new HashSet<>(changedProjects);
         changed.removeAll(configuration.ignoredProjects);
         if (configuration.impacted) {
-            mavenSession.getProjects().stream()
-                    .filter(changed::contains)
-                    .forEach(p -> collectDependents(mavenSession.getAllProjects(), p, changed));
+            Set<MavenProject> impacted = new HashSet<>(changedProjects);
+            changed.forEach(p -> collectDependents(mavenSession.getAllProjects(), p, impacted));
+            changed.addAll(impacted);
         }
         if (configuration.buildSnapshotDependencies) {
             mavenSession.getProjects().stream()
